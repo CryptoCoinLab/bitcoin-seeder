@@ -45,7 +45,7 @@ e-mail address (with the @ part replaced by .) using -m.
 
 COMPILING
 ---------
-Compiling will require boost  (1.60 worked, it was not work under boost 1.69) and ssl.  On debian systems, these are provided by `libboost-dev` and `libssl-dev` respectively.
+Compiling will require boost and ssl.  On debian systems, these are provided by `libboost-dev` and `libssl-dev` respectively.
 
 $ make
 
