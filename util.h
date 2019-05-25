@@ -59,6 +59,8 @@ public:
 #define CRITICAL_BLOCK(cs)     \
     if (CCriticalBlock criticalblock = CCriticalBlock(cs))
 
+#define CRITICAL_BLOCK_ELSE
+
 #define SHARED_CRITICAL_BLOCK(cs)     \
     if (CCriticalBlock criticalblock = CCriticalBlock(cs, true))
 

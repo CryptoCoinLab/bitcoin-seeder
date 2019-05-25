@@ -35,7 +35,7 @@ public:
   CDnsSeedOpts() : nThreads(96), nDnsThreads(4), nPort(53), mbox(NULL), ns(NULL), host(NULL), tor(NULL), fUseTestNet(false), fWipeBan(false), fWipeIgnore(false), ipv4_proxy(NULL), ipv6_proxy(NULL) {}
 
   void ParseCommandLine(int argc, char **argv) {
-    static const char *help = "Bitcoin-seeder\n"
+    static const char *help = "safeseeder\n"
                               "Usage: %s -h <host> -n <ns> [-m <mbox>] [-t <threads>] [-p <port>]\n"
                               "\n"
                               "Options:\n"
@@ -374,7 +374,7 @@ extern "C" void* ThreadStats(void*) {
     char c[256];
     time_t tim = time(NULL);
     struct tm *tmp = localtime(&tim);
-    strftime(c, 256, "[%y-%m-%d %H:%M:%S]", tmp);
+    strftime(c, 256, "\r\n[%y-%m-%d %H:%M:%S]", tmp);
     CAddrDbStats stats;
     db.GetStats(stats);
     if (first)
@@ -397,17 +397,17 @@ extern "C" void* ThreadStats(void*) {
   return nullptr;
 }
 
-static const string mainnet_seeds[] = {"dnsseed.bluematt.me", "bitseed.xf2.org", "dnsseed.bitcoin.dashjr.org", "seed.bitcoin.sipa.be", ""};
-static const string testnet_seeds[] = {"testnet-seed.alexykot.me",
-                                       "testnet-seed.bitcoin.petertodd.org",
-                                       "testnet-seed.bluematt.me",
-                                       "testnet-seed.bitcoin.schildbach.de",
+static const string mainnet_seeds[] = {"120.78.227.96", "114.215.31.37", "47.95.23.220", "47.96.254.235", "106.14.66.206", "47.52.9.168", "47.75.17.223","47.88.247.232","47.89.208.160","47.74.13.245", ""};
+static const string testnet_seeds[] = {"120.78.227.96",
+                                       "114.215.31.37",
+                                       "47.95.23.220",
+                                       "47.96.254.235",
                                        ""};
 static const string *seeds = mainnet_seeds;
 
 extern "C" void* ThreadSeeder(void*) {
   if (!fTestNet){
-    db.Add(CService("kjy2eqzk4zwi5zd3.onion", 8333), true);
+    db.Add(CService("47.74.13.245", 5555), true);
   }
   do {
     for (int i=0; seeds[i] != ""; i++) {
@@ -421,65 +421,87 @@ extern "C" void* ThreadSeeder(void*) {
   } while(1);
   return nullptr;
 }
-
-int main(int argc, char **argv) {
+void clear()
+{
+    remove("dnsseed.dat");
+    remove("dnsseed.dat.new");
+    remove("dnsseed.dump");
+    remove("dnsstats.log");
+}
+int main(int argc, char **argv)
+{
+ //clear();
   signal(SIGPIPE, SIG_IGN);
   setbuf(stdout, NULL);
   CDnsSeedOpts opts;
   opts.ParseCommandLine(argc, argv);
   printf("Supporting whitelisted filters: ");
-  for (std::set<uint64_t>::const_iterator it = opts.filter_whitelist.begin(); it != opts.filter_whitelist.end(); it++) {
-      if (it != opts.filter_whitelist.begin()) {
+  for (std::set<uint64_t>::const_iterator it = opts.filter_whitelist.begin(); it != opts.filter_whitelist.end(); it++)
+  {
+      if (it != opts.filter_whitelist.begin())
+      {
           printf(",");
       }
       printf("0x%lx", (unsigned long)*it);
   }
-  printf("\n");
-  if (opts.tor) {
+  printf("\r\n");
+  if (opts.tor)
+  {
     CService service(opts.tor, 9050);
-    if (service.IsValid()) {
+    if (service.IsValid())
+    {
       printf("Using Tor proxy at %s\n", service.ToStringIPPort().c_str());
       SetProxy(NET_TOR, service);
     }
   }
-  if (opts.ipv4_proxy) {
+  if (opts.ipv4_proxy)
+  {
     CService service(opts.ipv4_proxy, 9050);
-    if (service.IsValid()) {
-      printf("Using IPv4 proxy at %s\n", service.ToStringIPPort().c_str());
+    if (service.IsValid())
+    {
+      printf("Using IPv4 proxy at %s\r\n", service.ToStringIPPort().c_str());
       SetProxy(NET_IPV4, service);
     }
   }
-  if (opts.ipv6_proxy) {
+  if (opts.ipv6_proxy)
+  {
     CService service(opts.ipv6_proxy, 9050);
-    if (service.IsValid()) {
-      printf("Using IPv6 proxy at %s\n", service.ToStringIPPort().c_str());
+    if (service.IsValid())
+    {
+      printf("Using IPv6 proxy at %s\r\n", service.ToStringIPPort().c_str());
       SetProxy(NET_IPV6, service);
     }
   }
   bool fDNS = true;
-  if (opts.fUseTestNet) {
-      printf("Using testnet.\n");
-      pchMessageStart[0] = 0x0b;
-      pchMessageStart[1] = 0x11;
-      pchMessageStart[2] = 0x09;
-      pchMessageStart[3] = 0x07;
+  if (opts.fUseTestNet)
+  {
+      printf("Using testnet.\r\n");
+      pchMessageStart[0] = 0x52;
+      pchMessageStart[1] = 0x59;
+      pchMessageStart[2] = 0x5e;
+      pchMessageStart[3] = 0xbb;
       seeds = testnet_seeds;
       fTestNet = true;
   }
-  if (!opts.ns) {
-    printf("No nameserver set. Not starting DNS server.\n");
+  if (!opts.ns)
+  {
+    printf("No nameserver set. Not starting DNS server.\r\n");
     fDNS = false;
   }
-  if (fDNS && !opts.host) {
-    fprintf(stderr, "No hostname set. Please use -h.\n");
+  if (fDNS && !opts.host)
+  {
+    fprintf(stderr, "No hostname set. Please use -h.\r\n");
     exit(1);
   }
-  if (fDNS && !opts.mbox) {
-    fprintf(stderr, "No e-mail address set. Please use -m.\n");
+  if (fDNS && !opts.mbox)
+  {
+    fprintf(stderr, "No e-mail address set. Please use -m.\r\n");
     exit(1);
   }
+    
   FILE *f = fopen("dnsseed.dat","r");
-  if (f) {
+  if (f)
+  {
     printf("Loading dnsseed.dat...");
     CAutoFile cf(f);
     cf >> db;
@@ -487,10 +509,11 @@ int main(int argc, char **argv) {
         db.banned.clear();
     if (opts.fWipeIgnore)
         db.ResetIgnores();
-    printf("done\n");
+    printf("done\r\n");
   }
   pthread_t threadDns, threadSeed, threadDump, threadStats;
-  if (fDNS) {
+  if (fDNS)
+  {
     printf("Starting %i DNS threads for %s on %s (port %i)...", opts.nDnsThreads, opts.host, opts.ns, opts.nPort);
     dnsThread.clear();
     for (int i=0; i<opts.nDnsThreads; i++) {
@@ -499,21 +522,22 @@ int main(int argc, char **argv) {
       printf(".");
       Sleep(20);
     }
-    printf("done\n");
+    printf("done\r\n");
   }
   printf("Starting seeder...");
   pthread_create(&threadSeed, NULL, ThreadSeeder, NULL);
-  printf("done\n");
+  printf("done\r\n");
   printf("Starting %i crawler threads...", opts.nThreads);
   pthread_attr_t attr_crawler;
   pthread_attr_init(&attr_crawler);
   pthread_attr_setstacksize(&attr_crawler, 0x20000);
-  for (int i=0; i<opts.nThreads; i++) {
+  for (int i=0; i<opts.nThreads; i++)
+  {
     pthread_t thread;
     pthread_create(&thread, &attr_crawler, ThreadCrawler, &opts.nThreads);
   }
   pthread_attr_destroy(&attr_crawler);
-  printf("done\n");
+  printf("done\r\n");
   pthread_create(&threadStats, NULL, ThreadStats, NULL);
   pthread_create(&threadDump, NULL, ThreadDumper, NULL);
   void* res;

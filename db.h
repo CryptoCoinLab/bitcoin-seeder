@@ -12,11 +12,11 @@
 
 #define MIN_RETRY 1000
 
-#define REQUIRE_VERSION 70001
+#define REQUIRE_VERSION 70208
 
 static inline int GetRequireHeight(const bool testnet = fTestNet)
 {
-    return testnet ? 500000 : 350000;
+    return testnet ? 10000 : 1000000;
 }
 
 std::string static inline ToString(const CService &ip) {
@@ -231,7 +231,10 @@ public:
       stats.nTracked = ourId.size();
       stats.nGood = goodId.size();
       stats.nNew = unkId.size();
+    if(stats.nTracked != 0)
       stats.nAge = time(NULL) - idToInfo[ourId[0]].ourLastTry;
+    else
+        stats.nAge = 0;
     }
   }
 
@@ -328,6 +331,8 @@ public:
   bool Get(CServiceResult &ip, int& wait) {
     CRITICAL_BLOCK(cs)
       return Get_(ip, wait);
+    CRITICAL_BLOCK_ELSE
+      return false;
   }
   void GetMany(std::vector<CServiceResult> &ips, int max, int& wait) {
     CRITICAL_BLOCK(cs) {
