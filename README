@@ -1,8 +1,8 @@
-safeseeder
+SafeSeeder
 ==============
 
-safeseeder is a crawler for the SAFE(anwang.com) network, which exposes a list
-of reliable nodes via a built-in DNS server.
+SafeSeeder is a crawler for the SAFE(anwang.com) network, which exposes a list
+of reliable nodes via a built-in DNS server. It is based on bitcoin-seeder.
 
 Features:
 

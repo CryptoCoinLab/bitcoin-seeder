@@ -1,3 +1,9 @@
 *.o
 dnsseed*
 dnsstats.log
+.DS_Store
+*.pbxproj
+*.pbxproj
+*.xcworkspacedata
+*.xcuserstate
+*.plist
